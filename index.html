@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-body {
-  overflow:hidden;
-   margin:0;
-}
-
-text {
-  font-family: sans-serif;
-  pointer-events: none;
-}
-
+	body {
+		overflow: hidden;
+		margin: 0;
+	}
+	
+	text {
+		font-family: sans-serif;
+		pointer-events: none;
+	}
 </style>
+
 <body>
-<script src="d3.v3.min.js"></script>
-<script src="jquery-3.4.0.min.js"></script>
-<script>
+	<script src="d3.v3.min.js"></script>
+	<script src="jquery-3.4.0.min.js"></script>
+	<script>
 var w = window.innerWidth;
 var h = window.innerHeight;
 
@@ -90,10 +90,12 @@ var linkedByIndex = {};
   var node = g.selectAll(".node")
     .data(graph.nodes)
     .enter().append("g")
-    .attr("class", "node")
-	
+    .attr("class", "node")	
     .call(force.drag)
-
+.on("click", function (d) {
+          //    removePopup();
+              drawPopup(d.name,(d3.event.pageX) + "px",(d3.event.pageY) + "px");
+            })
 	
 	node.on("dblclick.zoom", function(d) { d3.event.stopPropagation();
 	var dcx = (window.innerWidth/2-d.x*zoom.scale());
@@ -114,18 +116,21 @@ var linkedByIndex = {};
 		towhite = "fill"
 	}
 		
-	
-	
-  var circle = node.append("path")
-  
-  
+	//use below code for shapes	
+    var circle = node.append("path")
       .attr("d", d3.svg.symbol()
-        .size(function(d) { return Math.PI*Math.pow(size(d.size)||nominal_base_node_size,2); })
-        .type(function(d) { return d.type; }))
-	.style("stroke-width", nominal_stroke)
-	.style("fill", function (d) { return d.color; });
+      .size(function(d) { return Math.PI*Math.pow(size(d.size)||nominal_base_node_size,2); })
+      .type(function(d) { return d.type; }))
+  	  .style("stroke-width", nominal_stroke)
+  	  .style("fill", function (d) { return d.color; });
 	
-  	
+	//use below code for images	
+    var img1 = node.append("image")  
+      .attr("xlink:href",function(d) { return "images/"+d.image; })
+      .attr("height", "40")
+      .attr("width", "40")
+      .attr("x", -20)
+      .attr("y", -20);	
 				
   var text = g.selectAll(".text")
     .data(graph.nodes)
@@ -318,7 +323,34 @@ function set_highlight(d)
 }
  blink();
 });
-		
+function removePopup() {
+        var svg = document.querySelector('svg');
+        var element = document.getElementById('frObj');
+        if(element!=undefined)
+        {
+        svg.removeChild(element);
+        }
+      }
+      function drawPopup(content,x,y) {
+		  var divW=w/4;
+		  var divH=h/2;
+		  x=w/2-divW/2;
+			y=h/2-divW/2;
+        var ns = 'http://www.w3.org/2000/svg';
+        var svg = document.querySelector('svg');
+        var foreignObject = document.createElementNS(ns, 'foreignObject');
+        foreignObject.setAttribute('height',divH);
+        foreignObject.setAttribute('width', divW);
+        foreignObject.setAttribute('x', x);
+        foreignObject.setAttribute('y', y);
+        foreignObject.setAttribute('id', "frObj");
+        var div = document.createElement('div');
+        div.innerHTML = "<div id='divPopup' style='height:300px;background: #eee;box-shadow: 0 0 5px #999999;z-index: 10;padding:10px;'><div style='text-align:right;' onclick='javascript:document.getElementById(\"frObj\").remove();'>&times;</div><p style='color: #2e6c80; text-align: right;'><strong><a href='https://google.com' target='_blank'>Full Details</a></strong><br/>(press Ctrl and Click to follow above link)</p><br/><p style='color: #2e6c80; text-align: left;'>Comment: <br/>" + content + "</p></div>";
+
+        foreignObject.appendChild(div);
+        svg.appendChild(foreignObject); //svg is an already created svg element containing a d3 chart
+
+      }		
 function vis_by_type(type)
 {
 	switch (type) {
@@ -359,10 +391,11 @@ function isNumber(n) {
 
 function blink() {
             for (i = 0; i != 30; i++) {
-                $('.link').fadeTo('slow', 0.5).fadeTo('slow', 3.0);
+              //  $('.link').fadeTo('slow', 0.5).fadeTo('slow', 3.0);
 				 $('.node').fadeTo('slow', 0.8).fadeTo('slow', 5.0);
             }
         }
 </script>
 </body>
+
 </html>
